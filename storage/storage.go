@@ -2,15 +2,20 @@ package storage
 
 import (
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"io"
 
 	"github.com/alexKudryavtsev-web/grace_links_tg_bot/lib/e"
 )
 
+var (
+	ErrNoSavedPage = errors.New("no saved page")
+)
+
 type Storage interface {
 	Save(p *Page) error
-	PickRandom(userName string) error
+	PickRandom(userName string) (Page, error)
 	Remove(p *Page) error
 	IsExists(p *Page) (bool, error)
 }
@@ -30,5 +35,5 @@ func (p *Page) Hash() (string, error) {
 		return "", e.Wrap("can't calculate hash", err)
 	}
 
-	return fmt.Sprintf("%x", h.Sum(nil)), nil 
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
