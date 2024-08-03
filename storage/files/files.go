@@ -16,7 +16,6 @@ const (
 	defaultPerm = 0774
 )
 
-
 type Storage struct {
 	basePath string
 }
@@ -60,8 +59,15 @@ func (s Storage) PickRandom(userName string) (page *storage.Page, err error) {
 
 	path := filepath.Join(s.basePath, userName)
 
-	files, err := os.ReadDir(path)
+	stat, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+	if !stat.IsDir() {
+		return nil, storage.ErrNoSavedPage
+	}
 
+	files, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +108,7 @@ func (s Storage) IsExists(p *storage.Page) (bool, error) {
 
 	switch _, err = os.Stat(path); {
 	case errors.Is(err, os.ErrNotExist):
-		return false, nil 
+		return false, nil
 	case err != nil:
 		msg := fmt.Sprintf("can't check if file %s exists", path)
 		return false, e.Wrap(msg, err)
