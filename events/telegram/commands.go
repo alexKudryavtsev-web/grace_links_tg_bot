@@ -80,7 +80,7 @@ func (p *Processor) sendRandom(chatID int, username string) (err error) {
 		return err
 	}
 
-	return p.storage.Remove(&page)
+	return p.storage.Remove(page)
 }
 
 func (p *Processor) sendHelp(chatId int) error {

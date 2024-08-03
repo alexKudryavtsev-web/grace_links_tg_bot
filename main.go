@@ -4,27 +4,31 @@ import (
 	"flag"
 	"log"
 
-	"github.com/alexKudryavtsev-web/grace_links_tg_bot/clients/telegram"
+	tgClient "github.com/alexKudryavtsev-web/grace_links_tg_bot/clients/telegram"
+	event_consumer "github.com/alexKudryavtsev-web/grace_links_tg_bot/consumer/event-consumer"
+	"github.com/alexKudryavtsev-web/grace_links_tg_bot/storage/files"
+
+	"github.com/alexKudryavtsev-web/grace_links_tg_bot/events/telegram"
 )
 
 const (
 	tgBotHost = "api.telegram.org"
+	storage   = "file-storage"
+	batchSize = 10
 )
 
 func main() {
 	token := mustToken()
+	tgClient := tgClient.New(tgBotHost, token)
+	processor := telegram.New(&tgClient, files.New(storage))
+ 
+	log.Println("server started")
 
-	tgClient := telegram.New(tgBotHost, token)
+	consumer := event_consumer.New(&processor, &processor, batchSize)
 
-	_ = tgClient
-
-	// TODO: make tg client
-
-	// TODO: make fetcher
-
-	// TODO: make processor
-
-	// TODO: consumer.Start(fetcher, processor)
+	if err := consumer.Start(); err != nil {
+		log.Fatal("service is stopped", err)
+	}
 }
 
 func mustToken() string {

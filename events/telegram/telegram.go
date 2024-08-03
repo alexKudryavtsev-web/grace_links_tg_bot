@@ -46,8 +46,8 @@ func (c *Processor) Fetch(limit int) ([]events.Event, error) {
 
 	res := make([]events.Event, 0, len(updates))
 
-	for i, u := range updates {
-		res[i] = event(u)
+	for _, u := range updates {
+		res = append(res, event(u))
 	}
 
 	c.offset = updates[len(updates)-1].ID + 1
@@ -65,7 +65,7 @@ func (p *Processor) Process(event events.Event) error {
 }
 
 func (p *Processor) processMessage(event events.Event) (err error) {
-	defer func() { err = e.Wrap("can't process message", err) }()
+	defer func() { err = e.WrapIfErr("can't process message", err) }()
 
 	meta, err := meta(event)
 
